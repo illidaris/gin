@@ -40,7 +40,7 @@ func LoggerHandler() gin.HandlerFunc {
 			zap.String(string(HTTPClientIP), c.ClientIP()),
 			zap.String(string(HTTPUserAgent), c.Request.UserAgent()),
 			zap.Int(string(HTTPStatusCode), c.Writer.Status()),
-			zap.Duration(core.Duration.String(), cost),
+			zap.Int64(core.Duration.String(), cost.Milliseconds()),
 		)
 		logger.InfoCtx(curCtx, c.Errors.ByType(gin.ErrorTypePrivate).String())
 	}
