@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	ginEx "github.com/illidaris/gin"
@@ -13,7 +15,7 @@ func main() {
 	// init log core
 	logger.OnlyConsole()
 	// init gin
-	router := gin.Default()
+	router := gin.New()
 	router.Use(ginEx.LoggerHandler())
 	router.Use(ginEx.RecoverHandler())
 	router.GET("/test", func(c *gin.Context) {
@@ -22,5 +24,5 @@ func main() {
 	router.GET("/error", func(c *gin.Context) {
 		panic(errors.New("this is an error"))
 	})
-	router.Run(":8080")
+	ginEx.GracefulRun(context.Background(), router, ":8080", time.Second*5)
 }

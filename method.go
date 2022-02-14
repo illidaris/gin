@@ -1,14 +1,17 @@
 package gin
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net"
 	"net/http"
 	"net/http/httputil"
 	"os"
+	"os/signal"
 	"runtime/debug"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -82,5 +85,41 @@ func RecoverHandler() gin.HandlerFunc {
 			}
 		}()
 		c.Next()
+	}
+}
+
+func GracefulRun(ctx context.Context, e http.Handler, addr string, timeout time.Duration) {
+	// bind ip&port
+	srv := &http.Server{
+		Addr:    addr,
+		Handler: e,
+	}
+
+	errCh := make(chan error, 1)
+	defer close(errCh)
+	// listen
+	go func() {
+		// service connections
+		if err := srv.ListenAndServe(); err != nil {
+			errCh <- err
+		}
+	}()
+
+	notifyCtx, stop := signal.NotifyContext(ctx, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+
+	select {
+	case s := <-notifyCtx.Done():
+		stop()
+		logger.Info(fmt.Sprintf("Shutdown: Receive Sign(%s)", s))
+		timeoutCtx, cancel := context.WithTimeout(ctx, timeout)
+		defer cancel()
+		if err := srv.Shutdown(timeoutCtx); err != nil {
+			logger.Error(fmt.Sprintf("Shutdown: %s", err))
+		}
+		logger.Info("Shutdown: exit")
+		break
+	case err := <-errCh:
+		logger.Error(fmt.Sprintf("Listen: Receive Error %s", err))
+		break
 	}
 }
