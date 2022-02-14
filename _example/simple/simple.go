@@ -1,8 +1,5 @@
-# gin
-gin logger extension
-## 快速使用
-日志扩展使用
-```go
+package main
+
 import (
 	"errors"
 	"net/http"
@@ -27,4 +24,3 @@ func main() {
 	})
 	router.Run(":8080")
 }
-```
