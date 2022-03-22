@@ -36,6 +36,7 @@ func WithTrace(c *gin.Context, birth time.Time) *gin.Context {
 	// assembly trace & session
 	ctx := c.Request.Context()
 	ctx = logger.NewContext(ctx,
+		zap.String(core.Action.String(), c.Request.URL.Path),
 		zap.String(core.TraceID.String(), traceID),
 		zap.String(core.SessionID.String(), sID),
 		zap.Int64(core.SessionBirth.String(), sessionBirth))
