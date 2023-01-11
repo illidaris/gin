@@ -36,8 +36,8 @@ func WithTrace(c *gin.Context, birth time.Time) *gin.Context {
 	sessionBirth := birth.UTC().UnixNano()
 	// assembly trace & session
 	ctx := c.Request.Context()
-	core.TraceID.SetString(ctx, traceID) // set traceid  into ctx
-	core.SessionID.SetString(ctx, sID)   // set session  into ctx
+	ctx = core.TraceID.SetString(ctx, traceID) // set traceid  into ctx
+	ctx = core.SessionID.SetString(ctx, sID)   // set session  into ctx
 	ctx = logger.NewContext(ctx,
 		zap.String(core.Action.String(), c.Request.URL.Path),
 		zap.String(core.TraceID.String(), traceID),
