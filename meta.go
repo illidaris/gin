@@ -1,12 +1,13 @@
 package gin
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/illidaris/core"
 	"github.com/illidaris/logger"
 	"go.uber.org/zap"
-	"time"
 )
 
 type HTTPMetaData core.MetaData
@@ -35,6 +36,8 @@ func WithTrace(c *gin.Context, birth time.Time) *gin.Context {
 	sessionBirth := birth.UTC().UnixNano()
 	// assembly trace & session
 	ctx := c.Request.Context()
+	core.TraceID.SetString(ctx, traceID) // set traceid  into ctx
+	core.SessionID.SetString(ctx, sID)   // set session  into ctx
 	ctx = logger.NewContext(ctx,
 		zap.String(core.Action.String(), c.Request.URL.Path),
 		zap.String(core.TraceID.String(), traceID),
