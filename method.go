@@ -138,11 +138,15 @@ func GracefulRun(ctx context.Context, e http.Handler, addr string, timeout time.
 }
 
 func GracefulRunWithAop(ctx context.Context, e http.Handler, addr string, timeout time.Duration, before func(port int), after func()) {
-	defer after()
 	// bind ip&port
 	srv := &http.Server{
 		Handler: e,
 	}
+	BaseGracefulRunWithAop(ctx, srv, addr, timeout, before, after)
+}
+
+func BaseGracefulRunWithAop(ctx context.Context, srv *http.Server, addr string, timeout time.Duration, before func(port int), after func()) {
+	defer after()
 	errCh := make(chan error, 1)
 	defer close(errCh)
 	// listen
