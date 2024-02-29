@@ -17,7 +17,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/illidaris/core"
 	"github.com/illidaris/logger"
-	"github.com/illidaris/signature"
 	"go.uber.org/zap"
 )
 
@@ -47,18 +46,6 @@ func LoggerHandler() gin.HandlerFunc {
 			zap.Int64(core.Duration.String(), cost.Milliseconds()),
 		)
 		logger.InfoCtx(curCtx, c.Errors.ByType(gin.ErrorTypePrivate).String())
-	}
-}
-
-func SignatureMiddleware(f func(ctx context.Context, key string) string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		s := signature.DefaultSign(c.Request)
-		sign := signature.NewSignature()
-		secret := f(c.Request.Context(), s.AppID)
-		if b, err := sign.Verify(c.Request.Context(), s, secret); !b {
-			c.AbortWithError(http.StatusBadRequest, err)
-		}
-		c.Next()
 	}
 }
 
