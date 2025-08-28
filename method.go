@@ -45,7 +45,9 @@ func LoggerHandler() gin.HandlerFunc {
 			zap.Int(string(HTTPStatusCode), c.Writer.Status()),
 			zap.Int64(core.Duration.String(), cost.Milliseconds()),
 		)
-		logger.InfoCtx(curCtx, c.Errors.ByType(gin.ErrorTypePrivate).String())
+		if ginErrs := c.Errors.ByType(gin.ErrorTypePrivate).String(); ginErrs != "" {
+			logger.WarnCtx(curCtx, ginErrs)
+		}
 	}
 }
 
